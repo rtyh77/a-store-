@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة المشرف - عطور الفخامة</title>
+    <style>
+        body { background: #0c0c0c; color: #fff; font-family: sans-serif; padding: 25px; direction: rtl; text-align: right; }
+        .box { background: #141414; border: 1px solid #d4af37; padding: 20px; border-radius: 8px; max-width: 450px; margin: auto; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; color: #d4af37; font-size: 13px; }
+        input, select { width: 100%; padding: 8px; background: #222; border: 1px solid #333; color: #fff; border-radius: 4px; text-align: right; }
+        button { background: #d4af37; color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; margin-top: 5px; }
+        .item { background: #1c1c1c; padding: 10px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; font-size: 13px; }
+        .del { background: red; color: white; width: auto; padding: 4px 8px; font-size: 11px; }
+        .preview-img { max-width: 100px; max-height: 100px; display: block; margin-top: 5px; border-radius: 4px; display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- بوابة الدخول السرية -->
+    <div class="box" id="login-box">
+        <h2>تسجيل دخول المشرف 👑</h2>
+        <div class="input-group">
+            <label>اسم المستخدم:</label>
+            <input type="text" id="admin-user">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور:</label>
+            <input type="password" id="admin-pass">
+        </div>
+        <button onclick="checkAdminLogin()">دخول للوحة</button>
+    </div>
+
+    <!-- لوحة المشرف لإضافة وتعديل المنتجات -->
+    <div class="box" id="admin-box" style="display:none;">
+        <h2>لوحة التحكم - إضافة عطورك</h2>
+        <hr style="border-color:#222; margin: 15px 0;">
+        
+        <form id="add-product-form" onsubmit="saveProduct(event)">
+            <div class="input-group">
+                <label>اسم العطر:</label>
+                <input type="text" id="p-name" required>
+            </div>
+            <div class="input-group">
+                <label>التصنيف المتاح:</label>
+                <select id="p-category">
+                    <option value="عطور رجالية">عطور رجالية</option>
+                    <option value="عطور نسائية">عطور نسائية</option>
+                    <option value="عطور صيفية">عطور صيفية</option>
+                    <option value="عطور شتوية">عطور شتوية</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>السعر بالدينار (دج):</label>
+                <input type="number" id="p-price" required>
+            </div>
+            <div class="input-group">
+                <label>الكمية المتوفرة:</label>
+                <input type="number" id="p-stock" required>
+            </div>
+            <div class="input-group">
+                <label>اختر صورة العطر من المعرض:</label>
+                <input type="file" id="p-image-file" accept="image/*" onchange="previewImage(this)" required>
+                <img id="image-preview" class="preview-img" alt="معاينة الصورة">
+            </div>
+            <button type="submit">نشر العطر في المتجر</button>
+        </form>
+
+        <h3 style="margin-top:20px; color:#d4af37;">العطور المعروضة حالياً:</h3>
+        <div id="admin-products-list"></div>
+    </div>
+
+    <script>
+        let base64Image = "";
+
+        function checkAdminLogin() {
+            const user = document.getElementById('admin-user').value;
+            const pass = document.getElementById('admin-pass').value;
+            
+            if(user === "admin" && pass === "fakhama2026") {
+                document.getElementById('login-box').style.display = "none";
+                document.getElementById('admin-box').style.display = "block";
+                loadAdminProducts();
+            } else {
+                alert("بيانات المشرف خاطئة!");
+            }
+        }
+
+        // دالة لمعاينة الصورة وتحويلها إلى نص Base64
+        function previewImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64Image = e.target.result;
+                    const preview = document.getElementById('image-preview');
+                    preview.src = base64Image;
+                    preview.style.display = "block";
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            let products = JSON.parse(localStorage.getItem('perfume_products')) || [];
+            
+            const newProduct = {
+                id: Date.now(),
+                name: document.getElementById('p-name').value,
+                category: document.getElementById('p-category').value,
+                price: parseFloat(document.getElementById('p-price').value),
+                stock: parseInt(document.getElementById('p-stock').value),
+                image: base64Image // حفظ الصورة المشفرة هنا
+            };
+            
+            products.push(newProduct);
+            localStorage.setItem('perfume_products', JSON.stringify(products));
+            alert('تم نشر العطر الفخم بنجاح!');
+            document.getElementById('add-product-form').reset();
+            document.getElementById('image-preview').style.display = "none";
+            base64Image = ""; // تفريغ المتغير للعملية القادمة
+            loadAdminProducts();
+        }
+
+        function loadAdminProducts() {
+            let products = JSON.parse(localStorage.getItem('perfume_products')) || [];
+            const list = document.getElementById('admin-products-list');
+            list.innerHTML = '';
+            
+            products.forEach(p => {
+                list.innerHTML += `
+                    <div class="item">
+                        <span><strong>${p.name}</strong> - ${p.price} دج</span>
+                        <button class="del" onclick="deleteProduct(${p.id})">حذف</button>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteProduct(id) {
+            let products = JSON.parse(localStorage.getItem('perfume_products')) || [];
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('perfume_products', JSON.stringify(products));
+            loadAdminProducts();
+        }
+    </script>
+</body>
+</html>
+

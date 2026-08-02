@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عطور الفخامة - المتجر الرسمي</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- الهيدر العلوي وفيه السلة والقائمة الجانبية -->
+    <header>
+        <div class="cart-icon-top" onclick="toggleRightNav()">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span id="cart-count-badge">0</span>
+        </div>
+        <div class="menu-icon-top" onclick="toggleRightNav()">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+    </header>
+
+    <!-- شعار الفخامة الرئيسي والعبارة المحددة -->
+    <section class="logo-section">
+        <div class="crown-logo">
+            <i class="fa-solid fa-crown"></i>
+        </div>
+        <h1>عطور الفخامة</h1>
+        <p class="subtitle">الفخامة عنواننا وارظاء ذبون غايتنا</p>
+    </section>
+
+    <!-- شريط البحث عن المنتجات -->
+    <section class="search-section">
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass search-btn"></i>
+            <input type="text" id="search-input" placeholder="ابحث عن عطرك المفضل..." oninput="filterProducts()">
+        </div>
+    </section>
+
+    <!-- شريط الخيارات المتقطع المحدد (لا غير) -->
+    <nav class="categories-nav">
+        <button class="cat-btn active" onclick="filterCategory('all')">الكل</button>
+        <button class="cat-btn" onclick="filterCategory('عطور رجالية')">عطور رجالية</button>
+        <button class="cat-btn" onclick="filterCategory('عطور نسائية')">عطور نسائية</button>
+        <button class="cat-btn" onclick="filterCategory('عطور صيفية')">عطور صيفية</button>
+        <button class="cat-btn" onclick="filterCategory('عطور شتوية')">عطور شتوية</button>
+    </nav>
+
+    <!-- معرض المنتجات (يدعم التمرير) -->
+    <main class="products-container">
+        <div class="products-grid" id="products-wrapper">
+            <!-- المنتجات تولد هنا تلقائياً -->
+        </div>
+    </main>
+
+    <!-- الشريط الجانبي الأيمن (يحتوي الطلبات وسلة التسوق) -->
+    <div class="right-sidebar" id="right-sidebar">
+        <div class="sidebar-header">
+            <h2>سلة التسوق والطلبات</h2>
+            <i class="fa-solid fa-xmark close-btn" onclick="toggleRightNav()"></i>
+        </div>
+        <div class="sidebar-content" id="sidebar-cart-items">
+            <!-- عناصر السلة -->
+        </div>
+        <div class="sidebar-footer">
+            <div class="total-price-box">الإجمالي: <span id="cart-total-price">0</span> دج</div>
+            <button class="checkout-btn" onclick="openCheckoutModal()">تأكيد الطلب وشراء</button>
+        </div>
+    </div>
+
+    <!-- نافذة إتمام الطلب والدفع المخصصة -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content">
+            <i class="fa-solid fa-xmark close-modal" onclick="closeCheckoutModal()"></i>
+            <h2>إتمام الطلب - عطور الفخامة</h2>
+            
+            <form id="checkout-form" onsubmit="handleOrderSubmit(event)">
+                <!-- معلومات الزبون المطلوبة بدقة -->
+                <div class="input-group">
+                    <label>الاسم واللقب كاملاً:</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="input-group">
+                    <label>الدولة والمدينة:</label>
+                    <input type="text" id="customer-city" required>
+                </div>
+                <div class="input-group">
+                    <label>العنوان الكامل:</label>
+                    <input type="text" id="customer-address" required>
+                </div>
+                <div class="input-group">
+                    <label>رقم الهاتف:</label>
+                    <input type="tel" id="customer-phone" required>
+                </div>
+
+                <!-- خيارات الدفع المحددة -->
+                <div class="payment-methods">
+                    <label>طريقة الدفع:</label>
+                    <div class="methods-flex">
+                        <label class="method-option">
+                            <input type="radio" name="payment_method" value="baridimob" checked onclick="togglePaymentDetails('baridimob')">
+                            بريدي موب (BaridiMob)
+                        </label>
+                        <label class="method-option">
+                            <input type="radio" name="payment_method" value="cod" onclick="togglePaymentDetails('cod')">
+                            الدفع عند الاستلام
+                        </label>
+                    </div>
+                </div>
+
+                <!-- تفاصيل بريدي موب المخصصة بدقة -->
+                <div class="baridi-details-box" id="baridi-details-box">
+                    <p class="admin-ccp-info">
+                        رقم الـ CCP الخاص بالمتجر (قابل للنسخ): <br>
+                        <strong id="admin-ccp-num">123456789012</strong>
+                        <button type="button" class="copy-btn" onclick="copyCCP()">نسخ رقم الحساب</button>
+                    </p>
+                    <div class="input-group">
+                        <label>رقم الـ CCP الذي أودعت منه:</label>
+                        <input type="text" id="buyer-ccp">
+                    </div>
+                    <div class="input-group">
+                        <label>المبلغ المودع (دج):</label>
+                        <input type="number" id="buyer-amount">
+                    </div>
+                    <div class="input-group">
+                        <label>رقم الوصل:</label>
+                        <input type="text" id="buyer-receipt-num">
+                    </div>
+                    <div class="input-group">
+                        <label>رفع صورة أو ملف الوصل:</label>
+                        <input type="file" id="buyer-file-proof" accept="image/*,.pdf">
+                    </div>
+                </div>
+
+                <button type="submit" class="final-submit-btn">تأكيد الطلب وإرسال للواتساب</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- فوتر يحتوي معلومات المطور في الأسفل -->
+    <footer>
+        <p>مطور الموقع: qdwryyhyy644@gmail.com</p>
+        <p>اتصال بالمطور: 0656708603</p>
+    </footer>
+
+    <!-- فقاعة واتساب العائمة في الجهة اليسرى أسفل -->
+    <a href="https://wa.me/213656708603" class="whatsapp-floating-btn" target="_blank">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
