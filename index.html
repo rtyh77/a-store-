@@ -3,153 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عطور الفخامة - المتجر الرسمي</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>متجر عطور الفخامة ✨</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #d4af37;
+            --dark-bg: #0a0e27;
+            --card-bg: #1a1f3a;
+            --text-primary: #e8e8e8;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--dark-bg); 
+            color: var(--text-primary); 
+            line-height: 1.6; 
+        }
+
+        /* شريط التنقل */
+        header {
+            background-color: var(--card-bg);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+        header h1 { color: var(--primary-color); font-size: 28px; }
+
+        /* قسم الترحيب */
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .hero h2 { color: #fff; margin-bottom: 10px; }
+        .hero p { color: #a0a0a0; }
+
+        /* شبكة المنتجات */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        /* بطاقة المنتج */
+        .product-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2); }
+        .product-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #2a2f4a;
+        }
+        .product-title { color: #fff; font-size: 18px; margin-bottom: 5px; }
+        .product-category { color: #a0a0a0; font-size: 13px; margin-bottom: 10px; }
+        .product-price { color: var(--primary-color); font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+        
+        /* زر الطلب */
+        .btn-order {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #b8860b 100%);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-order:hover { filter: brightness(1.1); }
+
+        /* الفوتر */
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid var(--primary-color);
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- الهيدر العلوي وفيه السلة والقائمة الجانبية -->
     <header>
-        <div class="cart-icon-top" onclick="toggleRightNav()">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <span id="cart-count-badge">0</span>
-        </div>
-        <div class="menu-icon-top" onclick="toggleRightNav()">
-            <i class="fa-solid fa-bars"></i>
-        </div>
+        <h1>✨ عطور الفخامة ✨</h1>
     </header>
 
-    <!-- شعار الفخامة الرئيسي والعبارة المحددة -->
-    <section class="logo-section">
-        <div class="crown-logo">
-            <i class="fa-solid fa-crown"></i>
-        </div>
-        <h1>عطور الفخامة</h1>
-        <p class="subtitle">الفخامة عنواننا وارظاء ذبون غايتنا</p>
-    </section>
+    <div class="hero">
+        <h2>اكتشف سحر العطور الأصيلة</h2>
+        <p>تشكيلة مميزة من أرقى العطور التي تعبر عن شخصيتك</p>
+    </div>
 
-    <!-- شريط البحث عن المنتجات -->
-    <section class="search-section">
-        <div class="search-container">
-            <i class="fa-solid fa-magnifying-glass search-btn"></i>
-            <input type="text" id="search-input" placeholder="ابحث عن عطرك المفضل..." oninput="filterProducts()">
-        </div>
-    </section>
-
-    <!-- شريط الخيارات المتقطع المحدد (لا غير) -->
-    <nav class="categories-nav">
-        <button class="cat-btn active" onclick="filterCategory('all')">الكل</button>
-        <button class="cat-btn" onclick="filterCategory('عطور رجالية')">عطور رجالية</button>
-        <button class="cat-btn" onclick="filterCategory('عطور نسائية')">عطور نسائية</button>
-        <button class="cat-btn" onclick="filterCategory('عطور صيفية')">عطور صيفية</button>
-        <button class="cat-btn" onclick="filterCategory('عطور شتوية')">عطور شتوية</button>
-    </nav>
-
-    <!-- معرض المنتجات (يدعم التمرير) -->
-    <main class="products-container">
-        <div class="products-grid" id="products-wrapper">
-            <!-- المنتجات تولد هنا تلقائياً -->
-        </div>
-    </main>
-
-    <!-- الشريط الجانبي الأيمن (يحتوي الطلبات وسلة التسوق) -->
-    <div class="right-sidebar" id="right-sidebar">
-        <div class="sidebar-header">
-            <h2>سلة التسوق والطلبات</h2>
-            <i class="fa-solid fa-xmark close-btn" onclick="toggleRightNav()"></i>
-        </div>
-        <div class="sidebar-content" id="sidebar-cart-items">
-            <!-- عناصر السلة -->
-        </div>
-        <div class="sidebar-footer">
-            <div class="total-price-box">الإجمالي: <span id="cart-total-price">0</span> دج</div>
-            <button class="checkout-btn" onclick="openCheckoutModal()">تأكيد الطلب وشراء</button>
+    <div class="container">
+        <div class="products-grid" id="storeProducts">
+            <!-- سيتم عرض المنتجات هنا تلقائياً من لوحة التحكم -->
         </div>
     </div>
 
-    <!-- نافذة إتمام الطلب والدفع المخصصة -->
-    <div class="modal" id="checkout-modal">
-        <div class="modal-content">
-            <i class="fa-solid fa-xmark close-modal" onclick="closeCheckoutModal()"></i>
-            <h2>إتمام الطلب - عطور الفخامة</h2>
-            
-            <form id="checkout-form" onsubmit="handleOrderSubmit(event)">
-                <!-- معلومات الزبون المطلوبة بدقة -->
-                <div class="input-group">
-                    <label>الاسم واللقب كاملاً:</label>
-                    <input type="text" id="customer-name" required>
-                </div>
-                <div class="input-group">
-                    <label>الدولة والمدينة:</label>
-                    <input type="text" id="customer-city" required>
-                </div>
-                <div class="input-group">
-                    <label>العنوان الكامل:</label>
-                    <input type="text" id="customer-address" required>
-                </div>
-                <div class="input-group">
-                    <label>رقم الهاتف:</label>
-                    <input type="tel" id="customer-phone" required>
-                </div>
-
-                <!-- خيارات الدفع المحددة -->
-                <div class="payment-methods">
-                    <label>طريقة الدفع:</label>
-                    <div class="methods-flex">
-                        <label class="method-option">
-                            <input type="radio" name="payment_method" value="baridimob" checked onclick="togglePaymentDetails('baridimob')">
-                            بريدي موب (BaridiMob)
-                        </label>
-                        <label class="method-option">
-                            <input type="radio" name="payment_method" value="cod" onclick="togglePaymentDetails('cod')">
-                            الدفع عند الاستلام
-                        </label>
-                    </div>
-                </div>
-
-                <!-- تفاصيل بريدي موب المخصصة بدقة -->
-                <div class="baridi-details-box" id="baridi-details-box">
-                    <p class="admin-ccp-info">
-                        رقم الـ CCP الخاص بالمتجر (قابل للنسخ): <br>
-                        <strong id="admin-ccp-num">123456789012</strong>
-                        <button type="button" class="copy-btn" onclick="copyCCP()">نسخ رقم الحساب</button>
-                    </p>
-                    <div class="input-group">
-                        <label>رقم الـ CCP الذي أودعت منه:</label>
-                        <input type="text" id="buyer-ccp">
-                    </div>
-                    <div class="input-group">
-                        <label>المبلغ المودع (دج):</label>
-                        <input type="number" id="buyer-amount">
-                    </div>
-                    <div class="input-group">
-                        <label>رقم الوصل:</label>
-                        <input type="text" id="buyer-receipt-num">
-                    </div>
-                    <div class="input-group">
-                        <label>رفع صورة أو ملف الوصل:</label>
-                        <input type="file" id="buyer-file-proof" accept="image/*,.pdf">
-                    </div>
-                </div>
-
-                <button type="submit" class="final-submit-btn">تأكيد الطلب وإرسال للواتساب</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- فوتر يحتوي معلومات المطور في الأسفل -->
     <footer>
-        <p>مطور الموقع: qdwryyhyy644@gmail.com</p>
-        <p>اتصال بالمطور: 0656708603</p>
+        <p>جميع الحقوق محفوظة © 2026 - عطور الفخامة</p>
     </footer>
 
-    <!-- فقاعة واتساب العائمة في الجهة اليسرى أسفل -->
-    <a href="https://wa.me/213656708603" class="whatsapp-floating-btn" target="_blank">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
+    <script>
+        // دالة لجلب المنتجات من التخزين المحلي (التي أضفناها في لوحة التحكم)
+        function loadStoreProducts() {
+            // جلب المنتجات أو إنشاء مصفوفة فارغة إذا لم يوجد شيء
+            const products = JSON.parse(localStorage.getItem('perfumes')) || [];
+            const grid = document.getElementById('storeProducts');
+            
+            // إذا كان المتجر فارغاً
+            if(products.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">لا توجد منتجات حالياً. سيتم إضافة تشكيلة عطور جديدة قريباً! ⏳</p>';
+                return;
+            }
+            
+            grid.innerHTML = ''; // تنظيف الشبكة
+            
+            // إضافة كل منتج تم جلبه إلى واجهة المتجر
+            products.forEach(p => {
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <img src="${p.image}" class="product-img" alt="${p.name}">
+                        <h3 class="product-title">${p.name}</h3>
+                        <p class="product-category">${p.category}</p>
+                        <p class="product-price">${p.price} دج</p>
+                        <button class="btn-order" onclick="orderProduct('${p.name}', '${p.price}')">اطلب الآن عبر واتساب 🛒</button>
+                    </div>
+                `;
+            });
+        }
 
-    <script src="script.js"></script>
+        // دالة توجيه الزبون للواتساب لطلب المنتج
+        function orderProduct(name, price) {
+            const phone = "213656708603"; // رقمك الذي أضفته مسبقاً
+            const message = `مرحباً، أريد طلب عطر: *${name}* بسعر *${price} دج*.`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // تشغيل الدالة فور فتح الصفحة
+        window.onload = loadStoreProducts;
+    </script>
 </body>
 </html>
-
