@@ -304,8 +304,8 @@
         async function saveProduct() {
             const name = document.getElementById('pName').value.trim();
             const category = document.getElementById('pCategory').value;
-            const price = document.getElementById('pPrice').value.trim();
-            const stock = document.getElementById('pStock').value.trim();
+            const price = parseFloat(document.getElementById('pPrice').value) || 0;
+            const stock = parseInt(document.getElementById('pStock').value) || 0;
 
             if(!name || !price) { alert("يرجى إدخال اسم العطر والسعر!"); return; }
 
@@ -320,8 +320,8 @@
                         { 
                             name: name, 
                             category: category, 
-                            price: parseFloat(price), 
-                            stock: parseInt(stock) || 0,
+                            price: price, 
+                            stock: stock,
                             image: base64Image || 'https://via.placeholder.com/250'
                         }
                     ]);
@@ -329,6 +329,7 @@
                 if (error) {
                     alert("حدث خطأ أثناء حفظ العطر: " + error.message);
                 } else {
+                    alert("تم نشر العطر بنجاح! 🎉");
                     // تفريغ الحقول
                     document.getElementById('pName').value = '';
                     document.getElementById('pPrice').value = '';
