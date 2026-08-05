@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر عطور الفخامة ✨</title>
+    <!-- تضمين مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -111,7 +113,7 @@
 
     <div class="container">
         <div class="products-grid" id="storeProducts">
-            <!-- سيتم عرض المنتجات هنا تلقائياً من لوحة التحكم -->
+            <p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">جاري تحميل المنتجات... ⏳</p>
         </div>
     </div>
 
@@ -120,37 +122,55 @@
     </footer>
 
     <script>
-        // دالة لجلب المنتجات من التخزين المحلي (التي أضفناها في لوحة التحكم)
-        function loadStoreProducts() {
-            // جلب المنتجات أو إنشاء مصفوفة فارغة إذا لم يوجد شيء
-            const products = JSON.parse(localStorage.getItem('perfumes')) || [];
+        // إعدادات الربط بقاعدة البيانات السحابية Supabase
+        const SUPABASE_URL = "https://fzqwznyhrxexlqnsmpcs.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_9qHnFx2_tS8ISOsIShuySA_MEcEZAFd";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // دالة لجلب المنتجات من السحاب لعرضها للجميع
+        async function loadStoreProducts() {
             const grid = document.getElementById('storeProducts');
             
-            // إذا كان المتجر فارغاً
-            if(products.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">لا توجد منتجات حالياً. سيتم إضافة تشكيلة عطور جديدة قريباً! ⏳</p>';
-                return;
+            try {
+                const { data: products, error } = await _supabase
+                    .from('perfumes')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (error) {
+                    console.error("خطأ في جلب البيانات:", error);
+                    grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#ef4444; padding: 50px;">حدث خطأ أثناء تحميل المنتجات.</p>';
+                    return;
+                }
+
+                if (!products || products.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">لا توجد منتجات حالياً. سيتم إضافة تشكيلة عطور جديدة قريباً! ⏳</p>';
+                    return;
+                }
+
+                grid.innerHTML = ''; // تنظيف الشبكة
+                
+                // إضافة كل منتج من السحاب إلى الصفحة
+                products.forEach(p => {
+                    grid.innerHTML += `
+                        <div class="product-card">
+                            <img src="${p.image || 'https://via.placeholder.com/250'}" class="product-img" alt="${p.name}">
+                            <h3 class="product-title">${p.name}</h3>
+                            <p class="product-category">${p.category || 'عطور'}</p>
+                            <p class="product-price">${p.price} دج</p>
+                            <button class="btn-order" onclick="orderProduct('${p.name}', '${p.price}')">اطلب الآن عبر واتساب 🛒</button>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">تعذر الاتصال بقاعدة البيانات.</p>';
             }
-            
-            grid.innerHTML = ''; // تنظيف الشبكة
-            
-            // إضافة كل منتج تم جلبه إلى واجهة المتجر
-            products.forEach(p => {
-                grid.innerHTML += `
-                    <div class="product-card">
-                        <img src="${p.image}" class="product-img" alt="${p.name}">
-                        <h3 class="product-title">${p.name}</h3>
-                        <p class="product-category">${p.category}</p>
-                        <p class="product-price">${p.price} دج</p>
-                        <button class="btn-order" onclick="orderProduct('${p.name}', '${p.price}')">اطلب الآن عبر واتساب 🛒</button>
-                    </div>
-                `;
-            });
         }
 
         // دالة توجيه الزبون للواتساب لطلب المنتج
         function orderProduct(name, price) {
-            const phone = "213656708603"; // رقمك الذي أضفته مسبقاً
+            const phone = "213656708603";
             const message = `مرحباً، أريد طلب عطر: *${name}* بسعر *${price} دج*.`;
             const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
