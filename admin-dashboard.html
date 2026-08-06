@@ -21,7 +21,13 @@
             --danger-color: #ef4444;
             --info-color: #3b82f6;
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--dark-bg); color: var(--text-primary); line-height: 1.6; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--dark-bg); 
+            color: var(--text-primary); 
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
         
         /* Login */
         .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%); }
@@ -30,13 +36,24 @@
         .form-group { margin-bottom: 15px; text-align: right; }
         .form-group label { display: block; margin-bottom: 5px; color: var(--primary-color); font-size: 13px; font-weight: bold; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--dark-bg); color: #fff; font-size: 14px; outline: none; }
-        .form-group input:focus { border-color: var(--primary-color); }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary-color); }
         .login-btn, .btn-add { width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary-color) 0%, #b8860b 100%); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 15px; }
         .login-btn:disabled, .btn-add:disabled { opacity: 0.6; cursor: not-allowed; }
         
-        /* Dashboard Layout */
-        .dashboard-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background: var(--card-bg); border-left: 2px solid var(--primary-color); padding: 20px; position: fixed; height: 100vh; right: 0; top: 0; z-index: 100; }
+        /* Dashboard Layout Fixed Sidebar */
+        .dashboard-container { display: flex; min-height: 100vh; position: relative; }
+        .sidebar { 
+            width: 250px; 
+            background: var(--card-bg); 
+            border-left: 2px solid var(--primary-color); 
+            padding: 20px; 
+            position: fixed; 
+            height: 100vh; 
+            right: 0; 
+            top: 0; 
+            z-index: 1000; 
+            overflow-y: auto;
+        }
         .logo-section { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; }
         .logo-section h2 { color: var(--primary-color); font-size: 18px; }
         .nav-menu { list-style: none; }
@@ -45,7 +62,13 @@
         .nav-link.active, .nav-link:hover { background: var(--primary-color); color: #000; font-weight: bold; }
         .logout-btn { width: 100%; padding: 10px; background: var(--danger-color); color: #fff; border: none; border-radius: 6px; margin-top: 20px; cursor: pointer; font-weight: bold; }
         
-        .main-content { margin-right: 250px; padding: 30px; flex: 1; }
+        .main-content { 
+            margin-right: 250px; 
+            padding: 30px; 
+            flex: 1; 
+            width: calc(100% - 250px);
+            min-height: 100vh;
+        }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; }
         .header h1 { color: var(--primary-color); font-size: 26px; }
         
@@ -58,24 +81,26 @@
         .stat-card-value { color: var(--primary-color); font-size: 24px; font-weight: bold; margin-top: 5px; }
         
         /* Tables & Images */
-        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: right; }
+        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; max-width: 100%; }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 600px; }
         th { padding: 15px; color: var(--primary-color); border-bottom: 2px solid var(--border-color); font-size: 13px; }
         td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 13px; vertical-align: middle; }
         .product-img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--primary-color); }
         .btn-del { background: var(--danger-color); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         
         /* Modal */
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; }
         .modal.show { display: flex; }
         .modal-content { background: var(--card-bg); border: 2px solid var(--primary-color); padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
         .close-btn { background: none; border: none; color: #fff; font-size: 22px; float: left; cursor: pointer; }
         .preview-img { max-width: 100px; max-height: 100px; display: none; margin-top: 10px; border-radius: 6px; border: 1px solid var(--primary-color); }
 
+        .settings-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px; margin-bottom: 20px; }
+
         @media (max-width: 768px) {
             .sidebar { width: 70px; padding: 10px; }
             .sidebar span:last-child { display: none; }
-            .main-content { margin-right: 70px; padding: 15px; }
+            .main-content { margin-right: 70px; width: calc(100% - 70px); padding: 15px; }
         }
     </style>
 </head>
@@ -133,7 +158,7 @@
         <main class="main-content">
             <div class="header">
                 <h1 id="pageTitle">لوحة المعلومات</h1>
-                <span>المسؤول: <strong>admin</strong> 👤</span>
+                <span>المسؤول: <strong id="adminDisplayName">admin</strong> 👤</span>
             </div>
 
             <!-- الرئيسية -->
@@ -196,17 +221,38 @@
 
             <!-- الإعدادات -->
             <div id="settings" class="tab-content">
-                <div style="background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); max-width: 500px;">
-                    <h3 style="color:var(--primary-color); margin-bottom:15px;">بيانات التواصل</h3>
-                    <p style="margin-bottom: 8px;">اسم المتجر: <strong>عطور الفخامة</strong></p>
-                    <p style="margin-bottom: 8px;">الواتساب: <strong>213656708603</strong></p>
-                    <p style="margin-bottom: 8px;">البريد الإلكتروني: <strong>qdwryyhyy644@gmail.com</strong></p>
+                <!-- تعديل رقم الواتساب -->
+                <div class="settings-card">
+                    <h3 style="color:var(--primary-color); margin-bottom:15px;">رقم الواتساب المربوط بالموقع 📱</h3>
+                    <div class="form-group">
+                        <label>رقم الهاتف (مع الرمز الدولي بدون +)</label>
+                        <input type="text" id="storeWhatsapp" placeholder="213656708603">
+                    </div>
+                    <button class="btn-add" onclick="saveWhatsapp()">تحديث رقم الواتساب</button>
+                </div>
+
+                <!-- تعديل اسم المستخدم وكلمة السر -->
+                <div class="settings-card">
+                    <h3 style="color:var(--primary-color); margin-bottom:15px;">تغيير بيانات الدخول 🔐</h3>
+                    <div class="form-group">
+                        <label>كلمة المرور الحالية</label>
+                        <input type="password" id="currPassword" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label>اسم المستخدم الجديد</label>
+                        <input type="text" id="newUsername" placeholder="ادخل اسم جديد">
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور الجديدة</label>
+                        <input type="password" id="newPassword" placeholder="••••••••">
+                    </div>
+                    <button class="btn-add" onclick="updateCredentials()">تحديث بيانات الدخول</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- نافذة إضافة منتج مع رفع الصورة -->
+    <!-- نافذة إضافة منتج مع رفع الصورة والوصف -->
     <div id="productModal" class="modal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal()">&times;</button>
@@ -222,7 +268,8 @@
                     <option value="عطور رجالية">عطور رجالية</option>
                     <option value="عطور نسائية">عطور نسائية</option>
                     <option value="عطور صيفية">عطور صيفية</option>
-                    <option value="عطور شتوية">عطور شتوية</option>
+                    <option value="عطور للمناسبات">عطور للمناسبات</option>
+                    <option value="عطور أخرى">عطور أخرى</option>
                 </select>
             </div>
             <div class="form-group">
@@ -232,6 +279,10 @@
             <div class="form-group">
                 <label>الكمية المتوفرة</label>
                 <input type="number" id="pStock" placeholder="10">
+            </div>
+            <div class="form-group">
+                <label>وصف العطر</label>
+                <textarea id="pDescription" rows="3" placeholder="اكتب وصفاً جذاباً للعطر ومكوناته..."></textarea>
             </div>
             <div class="form-group">
                 <label>صورة العطر (من المعرض)</label>
@@ -250,17 +301,64 @@
 
         let base64Image = "";
 
+        // تحميل بيانات الإعدادات والواتساب
+        window.onload = function() {
+            const savedPhone = localStorage.getItem('store_whatsapp') || "213656708603";
+            document.getElementById('storeWhatsapp').value = savedPhone;
+            const savedAdmin = localStorage.getItem('admin_user') || "admin";
+            document.getElementById('adminDisplayName').innerText = savedAdmin;
+        };
+
         // الدخول
         function handleLogin() {
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value.trim();
-            if(u === "admin" && p === "fakhama2026") {
+
+            const savedUser = localStorage.getItem('admin_user') || "admin";
+            const savedPass = localStorage.getItem('admin_pass') || "fakhama2026";
+
+            if(u === savedUser && p === savedPass) {
                 document.getElementById('loginContainer').style.display = "none";
                 document.getElementById('dashboardContainer').style.display = "flex";
                 loadProducts();
             } else {
                 document.getElementById('errorMsg').style.display = "block";
             }
+        }
+
+        // حفظ بيانات الدخول الجديدة
+        function updateCredentials() {
+            const currP = document.getElementById('currPassword').value.trim();
+            const newU = document.getElementById('newUsername').value.trim();
+            const newP = document.getElementById('newPassword').value.trim();
+
+            const savedPass = localStorage.getItem('admin_pass') || "fakhama2026";
+
+            if(currP !== savedPass) {
+                alert("كلمة المرور الحالية غير صحيحة!");
+                return;
+            }
+
+            if(newU) {
+                localStorage.setItem('admin_user', newU);
+                document.getElementById('adminDisplayName').innerText = newU;
+            }
+            if(newP) {
+                localStorage.setItem('admin_pass', newP);
+            }
+
+            alert("تم تحديث بيانات الدخول بنجاح! 🎉");
+            document.getElementById('currPassword').value = '';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+        }
+
+        // حفظ رقم الواتساب
+        function saveWhatsapp() {
+            const phone = document.getElementById('storeWhatsapp').value.trim();
+            if(!phone) { alert("يرجى إدخال رقم الواتساب!"); return; }
+            localStorage.setItem('store_whatsapp', phone);
+            alert("تم تحديث رقم الواتساب المربوط بالموقع بنجاح! 📱");
         }
 
         // معاينة الصورة وتحويلها
@@ -300,12 +398,13 @@
             base64Image = "";
         }
 
-        // حفظ المنتج في Supabase
+        // حفظ المنتج في Supabase مع الوصف
         async function saveProduct() {
             const name = document.getElementById('pName').value.trim();
             const category = document.getElementById('pCategory').value;
             const price = parseFloat(document.getElementById('pPrice').value) || 0;
             const stock = parseInt(document.getElementById('pStock').value) || 0;
+            const description = document.getElementById('pDescription').value.trim();
 
             if(!name || !price) { alert("يرجى إدخال اسم العطر والسعر!"); return; }
 
@@ -322,6 +421,7 @@
                             category: category, 
                             price: price, 
                             stock: stock,
+                            description: description,
                             image: base64Image || 'https://via.placeholder.com/250'
                         }
                     ]);
@@ -330,10 +430,10 @@
                     alert("حدث خطأ أثناء حفظ العطر: " + error.message);
                 } else {
                     alert("تم نشر العطر بنجاح! 🎉");
-                    // تفريغ الحقول
                     document.getElementById('pName').value = '';
                     document.getElementById('pPrice').value = '';
                     document.getElementById('pStock').value = '';
+                    document.getElementById('pDescription').value = '';
                     document.getElementById('pImgFile').value = '';
                     closeModal();
                     loadProducts();
