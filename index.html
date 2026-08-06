@@ -13,12 +13,15 @@
             --dark-bg: #0a0e27;
             --card-bg: #1a1f3a;
             --text-primary: #e8e8e8;
+            --danger-color: #ef4444;
+            --success-color: #25d366;
         }
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background-color: var(--dark-bg); 
             color: var(--text-primary); 
             line-height: 1.6; 
+            padding-bottom: 60px;
         }
 
         /* شريط التنقل */
@@ -28,28 +31,70 @@
             text-align: center;
             border-bottom: 2px solid var(--primary-color);
             box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        header h1 { color: var(--primary-color); font-size: 28px; }
+        header h1 { color: var(--primary-color); font-size: 26px; }
+
+        /* قسم البحث والتصنيفات */
+        .search-filter-section {
+            max-width: 800px;
+            margin: 20px auto 10px auto;
+            padding: 0 15px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid var(--primary-color);
+            background: var(--card-bg);
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .categories-bar {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 15px 5px;
+            white-space: nowrap;
+            justify-content: flex-start;
+            scrollbar-width: none;
+        }
+        .categories-bar::-webkit-scrollbar { display: none; }
+        
+        .cat-btn {
+            background: var(--card-bg);
+            color: #a0a0a0;
+            border: 1px dashed var(--primary-color);
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            background: var(--primary-color);
+            color: #000;
+            font-weight: bold;
+            border-style: solid;
+        }
 
         /* قسم الترحيب */
-        .hero {
-            text-align: center;
-            padding: 40px 20px;
-        }
-        .hero h2 { color: #fff; margin-bottom: 10px; }
-        .hero p { color: #a0a0a0; }
+        .hero { text-align: center; padding: 20px 15px; }
+        .hero h2 { color: #fff; margin-bottom: 5px; font-size: 22px; }
+        .hero p { color: #a0a0a0; font-size: 14px; }
 
         /* شبكة المنتجات */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
+            gap: 20px;
         }
 
         /* بطاقة المنتج */
@@ -59,35 +104,159 @@
             border-radius: 12px;
             padding: 15px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             transition: transform 0.3s ease;
         }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2); }
         .product-img {
             width: 100%;
-            height: 250px;
+            height: 220px;
             object-fit: cover;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border: 1px solid #2a2f4a;
         }
-        .product-title { color: #fff; font-size: 18px; margin-bottom: 5px; }
-        .product-category { color: #a0a0a0; font-size: 13px; margin-bottom: 10px; }
-        .product-price { color: var(--primary-color); font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+        .product-title { color: #fff; font-size: 18px; margin-bottom: 4px; }
+        .product-category { color: var(--primary-color); font-size: 12px; margin-bottom: 8px; }
+        .product-desc { color: #a0a0a0; font-size: 13px; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-stock { color: #10b981; font-size: 12px; margin-bottom: 10px; }
+        .product-price { color: var(--primary-color); font-size: 20px; font-weight: bold; margin-bottom: 12px; }
         
-        /* زر الطلب */
-        .btn-order {
+        /* أزرار السلة والطلب */
+        .btn-add-cart {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: linear-gradient(135deg, var(--primary-color) 0%, #b8860b 100%);
             color: #000;
             border: none;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 14px;
             cursor: pointer;
             transition: 0.3s;
         }
-        .btn-order:hover { filter: brightness(1.1); }
+        .btn-add-cart:hover { filter: brightness(1.1); }
+
+        /* سلة التسوق الجانبية */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100vh;
+            background: var(--card-bg);
+            border-left: 2px solid var(--primary-color);
+            z-index: 1000;
+            transition: 0.4s ease;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid #2a2f4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-header h3 { color: var(--primary-color); }
+        .close-cart { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+        
+        .cart-items { flex: 1; overflow-y: auto; padding: 15px; }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--dark-bg);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #2a2f4a;
+        }
+        .cart-item-info { flex: 1; text-align: right; padding: 0 10px; }
+        .cart-item-title { font-size: 14px; color: #fff; }
+        .cart-item-price { font-size: 13px; color: var(--primary-color); }
+        
+        .qty-controls { display: flex; align-items: center; gap: 5px; }
+        .qty-btn {
+            background: var(--card-bg);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .delete-btn { background: none; border: none; color: var(--danger-color); cursor: pointer; font-size: 16px; margin-right: 5px; }
+
+        .cart-footer { padding: 20px; border-top: 1px solid #2a2f4a; background: var(--dark-bg); }
+        .total-price { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 16px; }
+        .btn-checkout {
+            width: 100%;
+            padding: 12px;
+            background: var(--success-color);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* زر فتح السلة العائم */
+        .cart-float-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-color);
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cart-count { background: #000; color: var(--primary-color); padding: 2px 8px; border-radius: 50%; font-size: 12px; }
+
+        /* فقاعة الواتساب العائمة الخفيفة */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 25px;
+            left: 20px;
+            width: 55px;
+            height: 55px;
+            background-color: #25d366;
+            color: #fff;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 900;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            animation: pulseFloat 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0); }
+        }
 
         /* الفوتر */
         footer {
@@ -102,6 +271,11 @@
 </head>
 <body>
 
+    <!-- زر فتح السلة العائم -->
+    <button class="cart-float-btn" onclick="toggleCart()">
+        🛒 السلة <span class="cart-count" id="cartCount">0</span>
+    </button>
+
     <header>
         <h1>✨ عطور الفخامة ✨</h1>
     </header>
@@ -111,25 +285,82 @@
         <p>تشكيلة مميزة من أرقى العطور التي تعبر عن شخصيتك</p>
     </div>
 
-    <div class="container">
-        <div class="products-grid" id="storeProducts">
-            <p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">جاري تحميل المنتجات... ⏳</p>
+    <!-- شريط البحث والتصنيفات -->
+    <div class="search-filter-section">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن عطرك المفضل..." oninput="filterProducts()">
+        <div class="categories-bar">
+            <button class="cat-btn active" onclick="selectCategory('الكل', this)">الكل</button>
+            <button class="cat-btn" onclick="selectCategory('عطور صيفية', this)">عطور صيفية</button>
+            <button class="cat-btn" onclick="selectCategory('عطور رجالية', this)">عطور رجالية</button>
+            <button class="cat-btn" onclick="selectCategory('عطور نسائية', this)">عطور نسائية</button>
+            <button class="cat-btn" onclick="selectCategory('عطور للمناسبات', this)">عطور للمناسبات</button>
+            <button class="cat-btn" onclick="selectCategory('عطور أخرى', this)">عطور أخرى</button>
         </div>
     </div>
+
+    <!-- شبكة العرض -->
+    <div class="container">
+        <div class="products-grid" id="storeProducts">
+            <p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">جاري تحميل العطور... ⏳</p>
+        </div>
+    </div>
+
+    <!-- سلة التسوق الجانبية -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>سلة التسوق 🛒</h3>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItemsList">
+            <p style="text-align:center; color:#a0a0a0; margin-top:30px;">السلة فارغة حالياً</p>
+        </div>
+        <div class="cart-footer">
+            <div class="total-price">
+                <span>الإجمالي:</span>
+                <span id="cartTotalPrice" style="color:var(--primary-color);">0 دج</span>
+            </div>
+            <button class="btn-checkout" onclick="checkoutWhatsApp()">
+                تأكيد الطلب عبر الواتساب 📱
+            </button>
+        </div>
+    </div>
+
+    <!-- فقاعة الواتساب العائمة -->
+    <a href="#" id="whatsappFloatBtn" class="whatsapp-float" target="_blank" title="تواصل معنا عبر واتساب">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+        </svg>
+    </a>
 
     <footer>
         <p>جميع الحقوق محفوظة © 2026 - عطور الفخامة</p>
     </footer>
 
     <script>
-        // إعدادات الربط بقاعدة البيانات السحابية Supabase
         const SUPABASE_URL = "https://fzqwznyhrxexlqnsmpcs.supabase.co";
         const SUPABASE_KEY = "sb_publishable_9qHnFx2_tS8ISOsIShuySA_MEcEZAFd";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // دالة لجلب المنتجات من السحاب لعرضها للجميع
+        let allProducts = [];
+        let cart = [];
+        let currentCategory = "الكل";
+
+        // تحميل رقم الواتساب المربوط بالمتجر
+        function getStorePhone() {
+            return localStorage.getItem('store_whatsapp') || "213656708603";
+        }
+
+        // إعداد رابط الواتساب العائم
+        function updateWhatsappLink() {
+            const phone = getStorePhone();
+            const btn = document.getElementById('whatsappFloatBtn');
+            btn.href = `https://wa.me/${phone}?text=${encodeURIComponent("مرحباً، أود الاستفسار عن عطوركم المميزة ✨")}`;
+        }
+
+        // جلب المنتجات من السحاب
         async function loadStoreProducts() {
             const grid = document.getElementById('storeProducts');
+            updateWhatsappLink();
             
             try {
                 const { data: products, error } = await _supabase
@@ -138,45 +369,161 @@
                     .order('id', { ascending: false });
 
                 if (error) {
-                    console.error("خطأ في جلب البيانات:", error);
+                    console.error(error);
                     grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#ef4444; padding: 50px;">حدث خطأ أثناء تحميل المنتجات.</p>';
                     return;
                 }
 
-                if (!products || products.length === 0) {
-                    grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">لا توجد منتجات حالياً. سيتم إضافة تشكيلة عطور جديدة قريباً! ⏳</p>';
-                    return;
-                }
-
-                grid.innerHTML = ''; // تنظيف الشبكة
-                
-                // إضافة كل منتج من السحاب إلى الصفحة
-                products.forEach(p => {
-                    grid.innerHTML += `
-                        <div class="product-card">
-                            <img src="${p.image || 'https://via.placeholder.com/250'}" class="product-img" alt="${p.name}">
-                            <h3 class="product-title">${p.name}</h3>
-                            <p class="product-category">${p.category || 'عطور'}</p>
-                            <p class="product-price">${p.price} دج</p>
-                            <button class="btn-order" onclick="orderProduct('${p.name}', '${p.price}')">اطلب الآن عبر واتساب 🛒</button>
-                        </div>
-                    `;
-                });
+                allProducts = products || [];
+                renderProducts();
             } catch (err) {
                 console.error(err);
-                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">تعذر الاتصال بقاعدة البيانات.</p>';
+                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#ef4444; padding: 50px;">تعذر الاتصال بقاعدة البيانات.</p>';
             }
         }
 
-        // دالة توجيه الزبون للواتساب لطلب المنتج
-        function orderProduct(name, price) {
-            const phone = "213656708603";
-            const message = `مرحباً، أريد طلب عطر: *${name}* بسعر *${price} دج*.`;
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        // عرض المنتجات بناءً على البحث والتصنيف
+        function renderProducts() {
+            const grid = document.getElementById('storeProducts');
+            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            let filtered = allProducts.filter(p => {
+                const matchCategory = (currentCategory === "الكل") || (p.category === currentCategory);
+                const matchSearch = p.name.toLowerCase().includes(searchVal);
+                return matchCategory && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">لا توجد عطور مطابقة للبحث حالياً ⏳</p>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            filtered.forEach(p => {
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <img src="${p.image || 'https://via.placeholder.com/250'}" class="product-img" alt="${p.name}">
+                            <h3 class="product-title">${p.name}</h3>
+                            <p class="product-category">${p.category || 'عطور'}</p>
+                            <p class="product-desc">${p.description || 'عطر فاخر ومميز يمنحك حضوراً ورائحة لا تُنسى.'}</p>
+                        </div>
+                        <div>
+                            <p class="product-stock">الكمية المتاحة: ${p.stock || 1}</p>
+                            <p class="product-price">${p.price} دج</p>
+                            <button class="btn-add-cart" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">إضافة إلى السلة 🛒</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // اختيار التصنيف
+        function selectCategory(catName, btn) {
+            currentCategory = catName;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts();
+        }
+
+        // البحث
+        function filterProducts() {
+            renderProducts();
+        }
+
+        // السلة
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('open');
+        }
+
+        function addToCart(id, name, price) {
+            let item = cart.find(i => i.id === id);
+            if(item) {
+                item.qty++;
+            } else {
+                cart.push({ id, name, price, qty: 1 });
+            }
+            updateCartUI();
+            toggleCart();
+        }
+
+        function changeQty(id, delta) {
+            let item = cart.find(i => i.id === id);
+            if(item) {
+                item.qty += delta;
+                if(item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartUI();
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(i => i.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cartItemsList');
+            const totalEl = document.getElementById('cartTotalPrice');
+            const countEl = document.getElementById('cartCount');
+
+            let total = 0;
+            let count = 0;
+
+            if(cart.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#a0a0a0; margin-top:30px;">السلة فارغة حالياً</p>';
+            } else {
+                list.innerHTML = '';
+                cart.forEach(item => {
+                    total += item.price * item.qty;
+                    count += item.qty;
+
+                    list.innerHTML += `
+                        <div class="cart-item">
+                            <button class="delete-btn" onclick="removeFromCart(${item.id})">🗑️</button>
+                            <div class="cart-item-info">
+                                <div class="cart-item-title">${item.name}</div>
+                                <div class="cart-item-price">${item.price} دج</div>
+                            </div>
+                            <div class="qty-controls">
+                                <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                                <span style="font-size:13px;">${item.qty}</span>
+                                <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            totalEl.innerText = `${total} دج`;
+            countEl.innerText = count;
+        }
+
+        // إرسال طلب السلة كاملاً للواتساب
+        function checkoutWhatsApp() {
+            if(cart.length === 0) {
+                alert("السلة فارغة! قم بفرز وإضافة بعض العطور أولاً.");
+                return;
+            }
+
+            const phone = getStorePhone();
+            let text = "مرحباً، أريد طلب المنتجات التالية من المتجر ✨:\n\n";
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const subTotal = item.price * item.qty;
+                total += subTotal;
+                text += `${index + 1}. *${item.name}*\n   - الكمية: ${item.qty}\n   - السعر: ${subTotal} دج\n\n`;
+            });
+
+            text += `💰 *المبلغ الإجمالي:* ${total} دج\n`;
+            text += "يرجى تأكيد الطلب وتحديد طريقة التوصيل وشكراً! 🙏";
+
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
             window.open(whatsappUrl, '_blank');
         }
 
-        // تشغيل الدالة فور فتح الصفحة
         window.onload = loadStoreProducts;
     </script>
 </body>
