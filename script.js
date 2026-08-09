@@ -15,12 +15,13 @@ function displayProducts(items) {
     }
 
     items.forEach(product => {
-        // إذا لم تكن هناك صورة، يتم وضع صورة مؤقتة فخمة
-        const imgSrc = product.image ? product.image : 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400';
+        // استخدام صورة مؤقتة أو رابط الصورة مع خاصية التحميل السريع
+        const imgSrc = product.image ? product.image : 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&auto=format&fit=crop&q=80';
         
         wrapper.innerHTML += `
             <div class="product-card">
-                <img src="${imgSrc}" alt="${product.name}">
+                <!-- أضفنا loading="lazy" و decoding="async" لتسريع تحميل الصور بشكل رهيب -->
+                <img src="${imgSrc}" alt="${product.name}" loading="lazy" decoding="async">
                 <div class="product-name">${product.name}</div>
                 <div class="product-stock">الكمية: ${product.stock}</div>
                 <div class="product-price">${product.price} دج</div>
@@ -125,9 +126,9 @@ function handleOrderSubmit(e) {
     message += `💳 طريقة الدفع: ${method === 'baridimob' ? 'بريدي موب' : 'الدفع عند الاستلام'}%0A`;
 
     if (method === 'baridimob') {
-        const buyerCCP = document.getElementById('buyer-ccp').value;
-        const buyerAmount = document.getElementById('buyer-amount').value;
-        const receiptNum = document.getElementById('buyer-receipt-num').value;
+        const buyerCCP = document.getElementById('buyer-ccp-num')?.value || '';
+        const buyerAmount = document.getElementById('buyer-amount')?.value || total;
+        const receiptNum = document.getElementById('buyer-receipt-num')?.value || '';
         
         message += `%0A*بيانات دفع بريدي موب للزبون:*%0A`;
         message += `🔢 الحساب المودع منه: ${buyerCCP}%0A`;
@@ -142,4 +143,3 @@ function handleOrderSubmit(e) {
     updateCartUI();
     closeCheckoutModal();
 }
-
