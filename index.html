@@ -319,7 +319,7 @@
                 <span>الإجمالي:</span>
                 <span id="cartTotalPrice" style="color:var(--primary-color);">0 دج</span>
             </div>
-            <button class="btn-checkout" onclick="checkoutWhatsApp()">
+            <button class="btn-checkout" id="checkoutBtn" onclick="checkoutWhatsApp()">
                 تأكيد الطلب عبر الواتساب 📱
             </button>
         </div>
@@ -500,26 +500,56 @@
             countEl.innerText = count;
         }
 
-        // إرسال طلب السلة كاملاً للواتساب
-        function checkoutWhatsApp() {
+        // ⚡ تسجيل الطلب سحابياً وتأكيده عبر الواتساب تلقائياً ⚡
+        async function checkoutWhatsApp() {
             if(cart.length === 0) {
-                alert("السلة فارغة! قم بفرز وإضافة بعض العطور أولاً.");
+                alert("السلة فارغة! قم بتصفح وإضافة بعض العطور أولاً.");
                 return;
             }
+
+            const btn = document.getElementById('checkoutBtn');
+            btn.innerText = "جاري تسجيل الطلب... ⏳";
+            btn.disabled = true;
 
             const phone = getStorePhone();
             let text = "مرحباً، أريد طلب المنتجات التالية من المتجر ✨:\n\n";
             let total = 0;
+            let itemsSummary = [];
 
             cart.forEach((item, index) => {
                 const subTotal = item.price * item.qty;
                 total += subTotal;
                 text += `${index + 1}. *${item.name}*\n   - الكمية: ${item.qty}\n   - السعر: ${subTotal} دج\n\n`;
+                itemsSummary.push(`${item.name} (${item.qty})`);
             });
 
             text += `💰 *المبلغ الإجمالي:* ${total} دج\n`;
             text += "يرجى تأكيد الطلب وتحديد طريقة التوصيل وشكراً! 🙏";
 
+            // 1. تسجيل الطلب في قاعدة بيانات Supabase
+            try {
+                await _supabase
+                    .from('orders')
+                    .insert([
+                        { 
+                            customer_name: "زبون جديد (عبر الواتساب)", 
+                            phone: "يظهر في المحادثة 📱", 
+                            total_price: total,
+                            items: itemsSummary.join(', '),
+                            status: "جديد 🆕"
+                        }
+                    ]);
+            } catch (err) {
+                console.error("فشل حفظ الطلب في القاعدة:", err);
+            }
+
+            // 2. إعادة ضبط السلة والواجهة
+            cart = [];
+            updateCartUI();
+            btn.innerText = "تأكيد الطلب عبر الواتساب 📱";
+            btn.disabled = false;
+
+            // 3. التوجيه المباشر للواتساب
             const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
             window.open(whatsappUrl, '_blank');
         }
