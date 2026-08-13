@@ -87,7 +87,19 @@
         td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 13px; vertical-align: middle; }
         .product-img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--primary-color); }
         .btn-del { background: var(--danger-color); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-refresh { background: var(--info-color); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; margin-bottom: 15px; }
         
+        .status-select {
+            background-color: var(--dark-bg);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
         /* Modal */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; }
         .modal.show { display: flex; }
@@ -201,19 +213,21 @@
 
             <!-- الطلبات -->
             <div id="orders" class="tab-content">
+                <button class="btn-refresh" onclick="loadOrders()">تحديث قائمة الطلبات 🔄</button>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>رقم الطلب</th>
-                                <th>اسم العميل</th>
-                                <th>الهاتف</th>
-                                <th>المبلغ</th>
-                                <th>التاريخ</th>
+                                <th>تفاصيل العطور المشتراة</th>
+                                <th>المبلغ الإجمالي</th>
+                                <th>حالة الطلب</th>
+                                <th>التاريخ والوقت</th>
+                                <th>الإجراء</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr><td colspan="5" style="text-align:center; color: var(--text-secondary);">لا توجد طلبات مسجلة حالياً</td></tr>
+                        <tbody id="ordersList">
+                            <tr><td colspan="6" style="text-align:center; color: var(--text-secondary);">جاري تحميل الطلبات... ⏳</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -321,6 +335,7 @@
                 document.getElementById('loginContainer').style.display = "none";
                 document.getElementById('dashboardContainer').style.display = "flex";
                 loadProducts();
+                loadOrders();
             } else {
                 document.getElementById('errorMsg').style.display = "block";
             }
@@ -370,7 +385,6 @@
                     const img = new Image();
                     img.src = e.target.result;
                     img.onload = function() {
-                        // أبعاد قصوى متناسقة
                         const maxWidth = 600;
                         const maxHeight = 600;
                         let width = img.width;
@@ -388,14 +402,12 @@
                             }
                         }
 
-                        // تصغير وتقليل جودة الصورة آلياً عبر Canvas
                         const canvas = document.createElement('canvas');
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // حفظ الصورة المضغوطة للغاية في القاعدة
                         base64Image = canvas.toDataURL('image/jpeg', 0.7);
 
                         const preview = document.getElementById('imgPreview');
@@ -414,6 +426,9 @@
             document.getElementById(tabId).classList.add('active');
             e.currentTarget.classList.add('active');
             document.getElementById('pageTitle').innerText = e.currentTarget.innerText.trim();
+
+            if (tabId === 'orders') loadOrders();
+            if (tabId === 'products') loadProducts();
         }
 
         function handleLogout() {
@@ -538,6 +553,97 @@
                 } catch (err) {
                     console.error(err);
                     alert("تعذر الاتصال بالسيرفر لحذف المنتج!");
+                }
+            }
+        }
+
+        // 🛒 جلب وإدارة الطلبات السحابية 🛒
+        async function loadOrders() {
+            const tbody = document.getElementById('ordersList');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-secondary);">جاري جلب الطلبات المسجلة... ⏳</td></tr>';
+
+            try {
+                const { data: orders, error } = await _supabase
+                    .from('orders')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (error) {
+                    console.error("خطأ جلب الطلبات:", error);
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--danger-color);">فشل جلب قائمة الطلبات!</td></tr>';
+                    return;
+                }
+
+                document.getElementById('totalOrders').innerText = orders ? orders.length : 0;
+
+                tbody.innerHTML = '';
+                if (!orders || orders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-secondary);">لا توجد طلبات مسجلة حالياً</td></tr>';
+                    return;
+                }
+
+                orders.forEach(o => {
+                    const dateStr = o.created_at ? new Date(o.created_at).toLocaleString('ar-EG') : 'غير محدد';
+                    const currentStatus = o.status || 'جديد 🆕';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>#${o.id}</td>
+                            <td><strong style="color:#fff;">${o.items || 'طلب بدون تفاصيل'}</strong></td>
+                            <td style="color:var(--primary-color); font-weight:bold;">${o.total_price || 0} دج</td>
+                            <td>
+                                <select class="status-select" onchange="updateOrderStatus(${o.id}, this.value)">
+                                    <option value="جديد 🆕" ${currentStatus === 'جديد 🆕' ? 'selected' : ''}>جديد 🆕</option>
+                                    <option value="قيد المعالجة ⏳" ${currentStatus === 'قيد المعالجة ⏳' ? 'selected' : ''}>قيد المعالجة ⏳</option>
+                                    <option value="تم الشحن 🚚" ${currentStatus === 'تم الشحن 🚚' ? 'selected' : ''}>تم الشحن 🚚</option>
+                                    <option value="مكتمل ✅" ${currentStatus === 'مكتمل ✅' ? 'selected' : ''}>مكتمل ✅</option>
+                                </select>
+                            </td>
+                            <td>${dateStr}</td>
+                            <td><button class="btn-del" onclick="deleteOrder(${o.id})">حذف</button></td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--danger-color);">خطأ في الاتصال بقاعدة البيانات</td></tr>';
+            }
+        }
+
+        // تحديث حالة الطلب
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const { error } = await _supabase
+                    .from('orders')
+                    .update({ status: newStatus })
+                    .eq('id', orderId);
+
+                if (error) {
+                    alert("فشل تحديث حالة الطلب: " + error.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ أثناء التواصل مع السيرفر!");
+            }
+        }
+
+        // حذف طلب
+        async function deleteOrder(orderId) {
+            if (confirm(`هل أنت تأكد من حذف الطلب رقم #${orderId}؟`)) {
+                try {
+                    const { error } = await _supabase
+                        .from('orders')
+                        .delete()
+                        .eq('id', orderId);
+
+                    if (error) {
+                        alert("حدث خطأ أثناء حذف الطلب: " + error.message);
+                    } else {
+                        loadOrders();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("تعذر حذف الطلب!");
                 }
             }
         }
