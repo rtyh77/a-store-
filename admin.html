@@ -1,4 +1,232 @@
-        // دالة ضغط الصورة ومعاينتها تلقائياً لتقليل الحجم وتسريع المتجر
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - متجر عطور الفخامة ✨</title>
+    
+    <!-- تضمين مكتبات Firebase الرسمية عبر CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-color: #d4af37;
+            --dark-bg: #0a0e27;
+            --card-bg: #1a1f3a;
+            --text-primary: #e8e8e8;
+            --danger-color: #ef4444;
+            --success-color: #25d366;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--dark-bg); 
+            color: var(--text-primary); 
+            padding: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            margin-bottom: 25px;
+        }
+        header h1 { color: var(--primary-color); font-size: 24px; }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .section-title {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #2a2f4a;
+            padding-bottom: 8px;
+        }
+
+        form { display: grid; gap: 12px; }
+        label { font-size: 14px; color: #aaa; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            background: var(--dark-bg);
+            border: 1px solid #2a2f4a;
+            color: #fff;
+            border-radius: 6px;
+            outline: none;
+            font-size: 14px;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary-color); }
+
+        .btn {
+            padding: 12px;
+            background: var(--primary-color);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-danger { background: var(--danger-color); color: #fff; }
+
+        #image-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--primary-color);
+            display: none;
+            margin-top: 10px;
+        }
+
+        /* الجداول */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #2a2f4a;
+            font-size: 14px;
+        }
+        th { color: var(--primary-color); background: #14182e; }
+        .img-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; }
+
+        .action-btns { display: flex; gap: 8px; }
+        .sm-btn { padding: 5px 10px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🛠️ لوحة التحكم - إدارة متجر عطور الفخامة</h1>
+    </header>
+
+    <!-- إعداد رقم الواتساب -->
+    <div class="section-card">
+        <h2 class="section-title">📱 إعدادات رقم واستقبال الطلبات (الواتساب)</h2>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="whatsappPhone" placeholder="مثال: 213656708603">
+            <button class="btn" style="width: 150px;" onclick="saveWhatsappPhone()">حفظ الرقم</button>
+        </div>
+    </div>
+
+    <!-- إضافة / تعديل منتج -->
+    <div class="section-card">
+        <h2 class="section-title" id="formTitle">✨ إضافة عطر جديد</h2>
+        <form id="productForm" onsubmit="handleProductSubmit(event)">
+            <input type="hidden" id="editProductId">
+            <div>
+                <label>اسم العطر</label>
+                <input type="text" id="prodName" required placeholder="مثال: عطر عود الملكي">
+            </div>
+            <div>
+                <label>التصنيف</label>
+                <select id="prodCategory" required>
+                    <option value="عطور صيفية">عطور صيفية</option>
+                    <option value="عطور رجالية">عطور رجالية</option>
+                    <option value="عطور نسائية">عطور نسائية</option>
+                    <option value="عطور للمناسبات">عطور للمناسبات</option>
+                    <option value="عطور أخرى">عطور أخرى</option>
+                </select>
+            </div>
+            <div>
+                <label>السعر (دج)</label>
+                <input type="number" id="prodPrice" required placeholder="مثال: 4500">
+            </div>
+            <div>
+                <label>الكمية المتاحة</label>
+                <input type="number" id="prodStock" required value="10">
+            </div>
+            <div>
+                <label>الوصف</label>
+                <textarea id="prodDesc" rows="3" placeholder="وصف العطر والمكونات..."></textarea>
+            </div>
+            <div>
+                <label>صورة العطر (يتم ضغطها تلقائياً لتسريع المتجر)</label>
+                <input type="file" accept="image/*" onchange="previewImage(this)">
+                <img id="image-preview" alt="معاينة الصورة">
+            </div>
+            <button type="submit" class="btn" id="saveProductBtn">حفظ العطر 💾</button>
+        </form>
+    </div>
+
+    <!-- قائمة المنتجات الحالية -->
+    <div class="section-card">
+        <h2 class="section-title">📦 قائمة العطور المسجلة</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>الاسم</th>
+                        <th>التصنيف</th>
+                        <th>السعر</th>
+                        <th>الكمية</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <tr><td colspan="6" style="text-align:center;">جاري تحميل العطور... ⏳</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- قائمة الطلبات المسجلة -->
+    <div class="section-card">
+        <h2 class="section-title">🛒 طلبات الزبائن المسجلة</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الزبون</th>
+                        <th>المنتجات المطلوب</th>
+                        <th>الإجمالي</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr><td colspan="6" style="text-align:center;">جاري تحميل الطلبات... ⏳</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // إعدادات Firebase الخاصة بمشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCH_JwGPMQgtFzjkJ_IOXbO9Gb_XXDCDs",
+            authDomain: "fakhama-store-52d7a.firebaseapp.com",
+            databaseURL: "https://fakhama-store-52d7a-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "fakhama-store-52d7a",
+            storageBucket: "fakhama-store-52d7a.firebasestorage.app",
+            messagingSenderId: "775333815918",
+            appId: "1:775333815918:web:56af64fb5ac20715a6287f",
+            measurementId: "G-5JZHWEK6EB"
+        };
+
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let base64Image = "";
+
+        // // دالة ضغط الصورة ومعاينتها تلقائياً لتقليل الحجم وتسريع المتجر
         function previewImage(input) {
             const file = input.files[0];
             if (file) {
@@ -44,3 +272,176 @@
                 reader.readAsDataURL(file);
             }
         }
+
+        // حفظ رقم الواتساب
+        function saveWhatsappPhone() {
+            const phone = document.getElementById('whatsappPhone').value.trim();
+            if(!phone) return alert("يرجى إدخال رقم هاتف صحيح");
+            localStorage.setItem('store_whatsapp', phone);
+            alert("تم حفظ رقم الواتساب بنجاح!");
+        }
+
+        // تحميل رقم الواتساب
+        function loadWhatsappPhone() {
+            const phone = localStorage.getItem('store_whatsapp') || "213656708603";
+            document.getElementById('whatsappPhone').value = phone;
+        }
+
+        // إضافة أو تعديل عطر في Firebase
+        async function handleProductSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editProductId').value;
+            const btn = document.getElementById('saveProductBtn');
+            btn.innerText = "جاري الحفظ... ⏳";
+            btn.disabled = true;
+
+            const productData = {
+                name: document.getElementById('prodName').value.trim(),
+                category: document.getElementById('prodCategory').value,
+                price: Number(document.getElementById('prodPrice').value),
+                stock: Number(document.getElementById('prodStock').value),
+                description: document.getElementById('prodDesc').value.trim()
+            };
+
+            if (base64Image) {
+                productData.image = base64Image;
+            }
+
+            try {
+                if (editId) {
+                    await database.ref('perfumes/' + editId).update(productData);
+                    alert("تم تعديل العطر بنجاح!");
+                } else {
+                    if (!productData.image) {
+                        productData.image = "https://via.placeholder.com/250";
+                    }
+                    const newRef = database.ref('perfumes').push();
+                    await newRef.set(productData);
+                    alert("تمت إضافة العطر بنجاح!");
+                }
+                resetForm();
+            } catch (err) {
+                console.error("خطأ أثناء الحفظ:", err);
+                alert("حدث خطأ أثناء الاتصال بـ Firebase");
+            } finally {
+                btn.innerText = "حفظ العطر 💾";
+                btn.disabled = false;
+            }
+        }
+
+        // استعراض المنتجات من Firebase Realtime Database
+        function listenToProducts() {
+            database.ref('perfumes').on('value', (snapshot) => {
+                const tbody = document.getElementById('productsTableBody');
+                const data = snapshot.val();
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">لا توجد عطور حالياً.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                Object.keys(data).forEach(id => {
+                    const item = data[id];
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><img src="${item.image || 'https://via.placeholder.com/40'}" class="img-thumb"></td>
+                            <td>${item.name || ''}</td>
+                            <td>${item.category || ''}</td>
+                            <td>${item.price || 0} دج</td>
+                            <td>${item.stock || 0}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="sm-btn" style="background:#3b82f6; color:#fff;" onclick="prepareEditProduct('${id}')">تعديل</button>
+                                    <button class="sm-btn btn-danger" onclick="deleteProduct('${id}')">حذف</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        // التحضير لتعديل منتج
+        function prepareEditProduct(id) {
+            database.ref('perfumes/' + id).once('value', (snapshot) => {
+                const item = snapshot.val();
+                if (!item) return;
+
+                document.getElementById('editProductId').value = id;
+                document.getElementById('prodName').value = item.name || '';
+                document.getElementById('prodCategory').value = item.category || 'عطور صيفية';
+                document.getElementById('prodPrice').value = item.price || 0;
+                document.getElementById('prodStock').value = item.stock || 0;
+                document.getElementById('prodDesc').value = item.description || '';
+                
+                if (item.image) {
+                    const preview = document.getElementById('image-preview');
+                    preview.src = item.image;
+                    preview.style.display = "block";
+                }
+
+                document.getElementById('formTitle').innerText = "✏️ تعديل بيانات العطر";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // حذف منتج
+        async function deleteProduct(id) {
+            if (confirm("هل أنت تأكد من رغبتك في حذف هذا العطر؟")) {
+                await database.ref('perfumes/' + id).remove();
+            }
+        }
+
+        // إعادة ضبط النموذج
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('editProductId').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('formTitle').innerText = "✨ إضافة عطر جديد";
+            base64Image = "";
+        }
+
+        // استعراض الطلبات من Firebase
+        function listenToOrders() {
+            database.ref('orders').on('value', (snapshot) => {
+                const tbody = document.getElementById('ordersTableBody');
+                const data = snapshot.val();
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">لا توجد طلبات مسجلة حالياً.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                Object.keys(data).reverse().forEach(id => {
+                    const order = data[id];
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${order.created_at || ''}</td>
+                            <td>${order.customer_name || ''}</td>
+                            <td>${order.items || ''}</td>
+                            <td>${order.total_price || 0} دج</td>
+                            <td><span style="color:var(--primary-color);">${order.status || 'جديد'}</span></td>
+                            <td>
+                                <button class="sm-btn btn-danger" onclick="deleteOrder('${id}')">حذف</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        // حذف طلب
+        async function deleteOrder(id) {
+            if (confirm("هل تريد حذف هذا الطلب من السجل؟")) {
+                await database.ref('orders/' + id).remove();
+            }
+        }
+
+        window.onload = function() {
+            loadWhatsappPhone();
+            listenToProducts();
+            listenToOrders();
+        };
+    </script>
+</body>
+</html>
