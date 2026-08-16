@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر عطور الفخامة ✨</title>
-    
-    <!-- تضمين مكتبات Firebase الرسمية عبر CDN -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
+    <!-- تضمين مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -340,21 +337,9 @@
     </footer>
 
     <script>
-        // إعدادات Firebase الخاصة بمشروعك
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCH_JwGPMQgtFzjkJ_IOXbO9Gb_XXDCDs",
-            authDomain: "fakhama-store-52d7a.firebaseapp.com",
-            databaseURL: "https://fakhama-store-52d7a-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "fakhama-store-52d7a",
-            storageBucket: "fakhama-store-52d7a.firebasestorage.app",
-            messagingSenderId: "775333815918",
-            appId: "1:775333815918:web:56af64fb5ac20715a6287f",
-            measurementId: "G-5JZHWEK6EB"
-        };
-
-        // تهيئة Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const SUPABASE_URL = "https://fzqwznyhrxexlqnsmpcs.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_9qHnFx2_tS8ISOsIShuySA_MEcEZAFd";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let allProducts = [];
         let cart = [];
@@ -372,29 +357,29 @@
             btn.href = `https://wa.me/${phone}?text=${encodeURIComponent("مرحباً، أود الاستفسار عن عطوركم المميزة ✨")}`;
         }
 
-        // جلب المنتجات من Firebase Realtime Database
-        function loadStoreProducts() {
+        // جلب المنتجات من السحاب
+        async function loadStoreProducts() {
             const grid = document.getElementById('storeProducts');
             updateWhatsappLink();
+            
+            try {
+                const { data: products, error } = await _supabase
+                    .from('perfumes')
+                    .select('*')
+                    .order('id', { ascending: false });
 
-            database.ref('perfumes').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) {
-                    allProducts = [];
-                    grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#a0a0a0; padding: 50px;">لا توجد عطور متوفرة حالياً.</p>';
+                if (error) {
+                    console.error(error);
+                    grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#ef4444; padding: 50px;">حدث خطأ أثناء تحميل المنتجات.</p>';
                     return;
                 }
 
-                allProducts = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key]
-                }));
-
+                allProducts = products || [];
                 renderProducts();
-            }, (error) => {
-                console.error("Firebase Error:", error);
-                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#ef4444; padding: 50px;">تعذر الاتصال بقاعدة البيانات. تحقق من القواعد (Rules).</p>';
-            });
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<p style="text-align:center; width:100%; grid-column: 1 / -1; color:#ef4444; padding: 50px;">تعذر الاتصال بقاعدة البيانات.</p>';
+            }
         }
 
         // عرض المنتجات بناءً على البحث والتصنيف
@@ -404,7 +389,7 @@
 
             let filtered = allProducts.filter(p => {
                 const matchCategory = (currentCategory === "الكل") || (p.category === currentCategory);
-                const matchSearch = p.name ? p.name.toLowerCase().includes(searchVal) : false;
+                const matchSearch = p.name.toLowerCase().includes(searchVal);
                 return matchCategory && matchSearch;
             });
 
@@ -415,19 +400,18 @@
 
             grid.innerHTML = '';
             filtered.forEach(p => {
-                const safeName = p.name ? p.name.replace(/'/g, "\\'") : '';
                 grid.innerHTML += `
                     <div class="product-card">
                         <div>
-                            <img src="${p.image || 'https://via.placeholder.com/250'}" class="product-img" alt="${p.name || 'عطر'}">
-                            <h3 class="product-title">${p.name || 'بدون اسم'}</h3>
+                            <img src="${p.image || 'https://via.placeholder.com/250'}" class="product-img" alt="${p.name}">
+                            <h3 class="product-title">${p.name}</h3>
                             <p class="product-category">${p.category || 'عطور'}</p>
                             <p class="product-desc">${p.description || 'عطر فاخر ومميز يمنحك حضوراً ورائحة لا تُنسى.'}</p>
                         </div>
                         <div>
                             <p class="product-stock">الكمية المتاحة: ${p.stock || 1}</p>
-                            <p class="product-price">${p.price || 0} دج</p>
-                            <button class="btn-add-cart" onclick="addToCart('${p.id}', '${safeName}', ${p.price || 0})">إضافة إلى السلة 🛒</button>
+                            <p class="product-price">${p.price} دج</p>
+                            <button class="btn-add-cart" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">إضافة إلى السلة 🛒</button>
                         </div>
                     </div>
                 `;
@@ -495,18 +479,17 @@
                     total += item.price * item.qty;
                     count += item.qty;
 
-                    const safeName = item.name ? item.name.replace(/'/g, "\\'") : '';
                     list.innerHTML += `
                         <div class="cart-item">
-                            <button class="delete-btn" onclick="removeFromCart('${item.id}')">🗑️</button>
+                            <button class="delete-btn" onclick="removeFromCart(${item.id})">🗑️</button>
                             <div class="cart-item-info">
                                 <div class="cart-item-title">${item.name}</div>
                                 <div class="cart-item-price">${item.price} دج</div>
                             </div>
                             <div class="qty-controls">
-                                <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
+                                <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
                                 <span style="font-size:13px;">${item.qty}</span>
-                                <button class="qty-btn" onclick="changeQty('${item.id}', -1)">-</button>
+                                <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
                             </div>
                         </div>
                     `;
@@ -517,7 +500,7 @@
             countEl.innerText = count;
         }
 
-        // ⚡ تسجيل الطلب في Firebase وتأكيده عبر الواتساب تلقائياً ⚡
+        // ⚡ تسجيل الطلب سحابياً وتأكيده عبر الواتساب تلقائياً ⚡
         async function checkoutWhatsApp() {
             if(cart.length === 0) {
                 alert("السلة فارغة! قم بتصفح وإضافة بعض العطور أولاً.");
@@ -543,20 +526,21 @@
             text += `💰 *المبلغ الإجمالي:* ${total} دج\n`;
             text += "يرجى تأكيد الطلب وتحديد طريقة التوصيل وشكراً! 🙏";
 
-            // 1. تسجيل الطلب في Firebase Realtime Database
+            // 1. تسجيل الطلب في قاعدة بيانات Supabase
             try {
-                const newOrderRef = database.ref('orders').push();
-                await newOrderRef.set({
-                    id: newOrderRef.key,
-                    customer_name: "زبون جديد (عبر الواتساب)",
-                    phone: "يظهر في المحادثة 📱",
-                    total_price: total,
-                    items: itemsSummary.join(', '),
-                    status: "جديد 🆕",
-                    created_at: new Date().toLocaleString('ar-EG')
-                });
+                await _supabase
+                    .from('orders')
+                    .insert([
+                        { 
+                            customer_name: "زبون جديد (عبر الواتساب)", 
+                            phone: "يظهر في المحادثة 📱", 
+                            total_price: total,
+                            items: itemsSummary.join(', '),
+                            status: "جديد 🆕"
+                        }
+                    ]);
             } catch (err) {
-                console.error("فشل حفظ الطلب في Firebase:", err);
+                console.error("فشل حفظ الطلب في القاعدة:", err);
             }
 
             // 2. إعادة ضبط السلة والواجهة
